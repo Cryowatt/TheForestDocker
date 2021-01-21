@@ -1,0 +1,1 @@
+c:\server\TheForestDedicatedServer.exe -batchmode -dedicated -nographics -nosteamclient @Args | Select-String -NotMatch "RenderTexture\.Create failed: format unsupported - 2\."

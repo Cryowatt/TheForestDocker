@@ -1,0 +1,133 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "saves_storage_account_name": {
+            "type": "String"
+        },
+        "saves_storage_account_key": {
+            "type": "String"
+        },
+        "log_analytics_workspace_id": {
+            "type": "String"
+        },
+        "log_analytics_workspace_key": {
+            "type": "String"
+        },
+        "server_container_name": {
+            "defaultValue": "theforest",
+            "type": "String"
+        },
+        "server_version": {
+            "defaultValue": "latest",
+            "type": "String"
+        },
+        "steam_account": {
+            "type": "String"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2018-10-01",
+            "name": "[parameters('server_container_name')]",
+            "location": "westus2",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "theforest",
+                        "properties": {
+                            "image": "[concat('cryowatt/theforest:', parameters('server_version'))]",
+                            "ports": [
+                                {
+                                    "port": 8766
+                                },
+                                {
+                                    "port": 27015
+                                },
+                                {
+                                    "port": 27016
+                                }
+                            ],
+                            "volumeMounts": [
+                                // {
+                                //     "name": "minecraftconfig",
+                                //     "mountPath": "/var/minecraft/"
+                                // },
+                                // {
+                                //     "name": "minecraftsaves",
+                                //     "mountPath": "/opt/minecraft/worlds"
+                                // }
+                            ],
+                            "environmentVariables": [
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 16.0,
+                                    "cpu": 1
+                                }
+                            },
+                            "command": [                                
+                                "-serverip",
+                                "(Get-NetIPAddress -InterfaceAlias Ethernet -AddressFamily IPv4 | Select-Object -ExpandProperty IPAddress)",
+                                "-servername",
+                                "Cryowatt Server",
+                                "-serverpassword",
+                                "test",
+                                "-serverSteamAccount",
+                                "[parameters('steam_account')]",
+                                "-showLogs",
+                                "on",
+                                "-enablevac",
+                                "off"
+                            ]
+                        }
+                    }
+                ],
+                "restartPolicy": "OnFailure",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "port": 8766
+                        },
+                        {
+                            "port": 27015
+                        },
+                        {
+                            "port": 27016
+                        }
+                    ],
+                    "type": "Public",
+                    "dnsNameLabel": "[parameters('server_container_name')]"
+                },
+                "osType": "Windows",
+                "diagnostics": {
+                    "logAnalytics": {
+                        "workspaceId": "[parameters('log_analytics_workspace_id')]",
+                        "workspaceKey": "[parameters('log_analytics_workspace_key')]"
+                    }
+                },
+                "volumes": [
+                    // {
+                    //     "name": "minecraftconfig",
+                    //     "azureFile": {
+                    //         "shareName": "minecraftconfig",
+                    //         "storageAccountName": "[parameters('saves_storage_account_name')]",
+                    //         "storageAccountKey": "[parameters('saves_storage_account_key')]"
+                    //     }
+                    // },
+                    // {
+                    //     "name": "minecraftsaves",
+                    //     "azureFile": {
+                    //         "shareName": "minecraftsaves",
+                    //         "storageAccountName": "[parameters('saves_storage_account_name')]",
+                    //         "storageAccountKey": "[parameters('saves_storage_account_key')]"
+                    //     }
+                    // }
+                ]
+            }
+        }
+    ]
+}
